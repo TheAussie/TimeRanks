@@ -13,7 +13,7 @@ using MySql.Data.MySqlClient;
 
 namespace TimeRanks //simplified from White's TimeBasedRanks plugin
 {
-    [ApiVersion(1,17)]
+    [ApiVersion(1,23)]
     public class TimeRanks : TerrariaPlugin
     {
         private IDbConnection _db;
@@ -180,7 +180,7 @@ namespace TimeRanks //simplified from White's TimeBasedRanks plugin
                     args.Player.SendErrorMessage("Sorry, the server doesn't have stats to check");
                     return;
                 }
-                var player = Players.GetByUsername(args.Player.UserAccountName);
+                var player = Players.GetByUsername(args.Player.User.Name);
                 args.Player.SendSuccessMessage("Your registration date: " + player.firstlogin);
                 args.Player.SendSuccessMessage("Your total registered time: " + player.TotalRegisteredTime);
                 args.Player.SendSuccessMessage("Your total time played: " + player.TotalTime);
@@ -210,7 +210,7 @@ namespace TimeRanks //simplified from White's TimeBasedRanks plugin
 
             if (!ply.IsLoggedIn) return;
 
-            var player = Players.GetByUsername(ply.UserAccountName);
+            var player = Players.GetByUsername(ply.User.Name);
             if (player == null)
                 return;
 
@@ -222,16 +222,16 @@ namespace TimeRanks //simplified from White's TimeBasedRanks plugin
         {
             if (args.Player == null)
                 return;
-            if (args.Player.Name != args.Player.UserAccountName) //returns if player logs in as different name
+            if (args.Player.Name != args.Player.User.Name) //returns if player logs in as different name
                 return;
 
-            var player = Players.GetByUsername(args.Player.UserAccountName);
+            var player = Players.GetByUsername(args.Player.User.Name);
 
             if (player != null)
                 player.tsPlayer = args.Player;
             else
             {
-                player = new TrPlayer(args.Player.UserAccountName, 0, DateTime.UtcNow.ToString("G"),
+                player = new TrPlayer(args.Player.User.Name, 0, DateTime.UtcNow.ToString("G"),
                     DateTime.UtcNow.ToString("G"), 0) { tsPlayer = args.Player };
                 Players.Add(player);
 
@@ -242,7 +242,7 @@ namespace TimeRanks //simplified from White's TimeBasedRanks plugin
             }
 
             if (args.Player.Group.Name == config.StartGroup && config.Groups.Count > 1) //starting rank/new player
-                TShock.Users.SetUserGroup(TShock.Users.GetUserByName(args.Player.UserAccountName), config.Groups.Keys.ToList()[0]); //AutoStarts the player to the config's first rank.
+                TShock.Users.SetUserGroup(TShock.Users.GetUserByName(args.Player.User.Name), config.Groups.Keys.ToList()[0]); //AutoStarts the player to the config's first rank.
             
             if (player.LastOnline.TotalSeconds > player.RankInfo.derankCost && player.RankInfo.derankCost > 0) //if not a new/starting player and passes inactivity limit. 0 = no limit
             {
